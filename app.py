@@ -45,11 +45,13 @@ def get_groq_api_key() -> str:
 
     if not key:
         try:
-            key = st.secrets["GROQ_API_KEY"]
+            key = st.secrets.get("GROQ_API_KEY")
+            if not key:
+                key = st.secrets.get("general", {}).get("GROQ_API_KEY")
         except Exception:
             key = ""
 
-    return key or ""
+    return str(key).strip() if key else ""
 
 
 def get_langsmith_key() -> str:
@@ -124,7 +126,8 @@ def build_rag_pipeline():
     groq_key = get_groq_api_key()
     if not groq_key:
         raise RuntimeError(
-            "Groq API key missing. Add GROQ_API_KEY in your environment or Streamlit secrets."
+            "Groq API key missing. In Streamlit Cloud, open app Settings > Secrets "
+            "and add GROQ_API_KEY = \"your Groq key\", then reboot the app."
         )
 
     langsmith_key = get_langsmith_key()
